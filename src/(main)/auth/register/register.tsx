@@ -22,7 +22,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon } from "lucide-react";
+import { ArrowLeft, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Card,
@@ -280,7 +280,15 @@ export default function Register() {
           </Form>
         </CardContent>
 
-        <CardFooter className="mt-2 justify-center">
+        <CardFooter className="grid mt-2 gap-4">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate("/")}
+          >
+            <ArrowLeft />
+            Kembali
+          </Button>
           <p className="text-sm text-center">
             Sudah punya akun?{" "}
             <Link to="/auth/login" className="underline text-muted-foreground">

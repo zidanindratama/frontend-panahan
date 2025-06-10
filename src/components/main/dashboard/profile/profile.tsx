@@ -25,7 +25,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon } from "lucide-react";
+import { ArrowLeft, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Card,
@@ -35,6 +35,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useNavigate } from "react-router";
 
 // Type untuk respon user
 export interface UserProfile {
@@ -66,6 +67,7 @@ const schema = z.object({
 });
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [fotoProfilUrl, setFotoProfilUrl] = useState<string>("");
 
   const form = useForm<z.infer<typeof schema>>({
@@ -132,11 +134,23 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10">
+    <div className="flex items-center justify-center px-4 py-10">
       <Card className="w-full max-w-2xl shadow-md">
+        <div className="w-full flex justify-end mb-4 px-6">
+          <Button
+            variant="outline"
+            className="flex items-center gap-1"
+            onClick={() => navigate("/dashboard")}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Kembali
+          </Button>
+        </div>
+
         <div className="flex justify-center mt-6">
-          <Avatar className="w-28 h-28 rounded-full border">
+          <Avatar className="w-28 h-28 rounded-full object-cover border">
             <AvatarImage
+              className="object-cover"
               src={
                 form.watch("foto") instanceof File
                   ? URL.createObjectURL(form.watch("foto"))

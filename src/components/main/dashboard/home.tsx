@@ -1,18 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ChevronRight } from "lucide-react";
-import { getBerita, type TBerita } from "@/services/berita";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Pagination,
   PaginationContent,
@@ -21,119 +17,254 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
+import { File } from "lucide-react";
+import toast from "react-hot-toast";
+import {
+  deleteUser,
+  demoteUser,
+  exportUsers,
+  getUsers,
+  promoteUser,
+  toggleMember,
+  type User,
+} from "@/services/admin";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Link } from "react-router";
 
-const ListBerita = () => {
-  const navigate = useNavigate();
-  const [beritaList, setBeritaList] = useState<TBerita[]>([]);
+const Home = () => {
+  useAuthRedirect();
+
   const [page, setPage] = useState(1);
+  const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchInput, setSearchInput] = useState("");
+
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"asc" | "desc">("desc");
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<User[]>([]);
 
-  // debounce searchInput → search
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      setPage(1);
-      setSearch(searchInput);
-    }, 500);
-
-    return () => clearTimeout(delay);
-  }, [searchInput]);
-
-  const fetchData = async () => {
+  const fetchUsers = async () => {
     try {
-      setLoading(true);
-      const res = await getBerita(search, sort, page, 6);
-      setBeritaList(res.data);
+      const res = await getUsers(page, limit, search);
+      setData(res.data);
       setTotalPages(res.totalPages);
     } catch (err) {
-      console.error("Gagal mengambil berita:", err);
-    } finally {
-      setLoading(false);
+      toast.error("Gagal memuat data pengguna");
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, [page, sort, search]);
+    const delay = setTimeout(() => {
+      fetchUsers();
+    }, 500); // delay 500ms
+
+    return () => clearTimeout(delay);
+  }, [search, page]);
+
+  const handlePromote = async (id: string) => {
+    try {
+      await promoteUser(id);
+      toast.success("User diangkat jadi Admin");
+      fetchUsers();
+    } catch {
+      toast.error("Gagal mengangkat user");
+    }
+  };
+
+  const handleDemote = async (id: string) => {
+    try {
+      await demoteUser(id);
+      toast.success("Admin diturunkan jadi User");
+      fetchUsers();
+    } catch {
+      toast.error("Gagal menurunkan admin");
+    }
+  };
+
+  const handleToggleMember = async (id: string) => {
+    try {
+      await toggleMember(id);
+      toast.success("Status member diubah");
+      fetchUsers();
+    } catch {
+      toast.error("Gagal mengubah status member");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteUser(id);
+      toast.success("User dihapus");
+      fetchUsers();
+    } catch {
+      toast.error("Gagal menghapus user");
+    }
+  };
+
+  const totalAdmin = data.filter((user) => user.role === "admin").length;
+  const totalUser = data.filter((user) => user.role === "user").length;
 
   return (
-    <div className="max-w-screen-xl mx-auto py-16 px-6 xl:px-0 space-y-8">
-      <div className="flex flex-col md:flex-row justify-between gap-4">
-        <Input
-          placeholder="Cari berita..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="w-full md:max-w-sm"
-        />
+    <div className="max-w-screen-xl mx-auto py-16 px-6 xl:px-0">
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold">Dashboard Admin</h2>
 
-        <Select
-          value={sort}
-          onValueChange={(val) => {
-            setPage(1);
-            setSort(val as "asc" | "desc");
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Urutkan" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="desc">Terbaru</SelectItem>
-            <SelectItem value="asc">Terlama</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        {loading ? (
-          <p className="text-muted-foreground">Memuat berita...</p>
-        ) : beritaList.length === 0 ? (
-          <p className="text-muted-foreground">Tidak ada berita ditemukan.</p>
-        ) : (
-          beritaList.map((item) => (
-            <Card
-              key={item._id}
-              className="shadow-none overflow-hidden rounded-md"
-            >
-              <CardHeader className="p-0">
-                <img
-                  src={item.foto || "/placeholder.svg"}
-                  alt={item.judul}
-                  className="w-full h-56 object-cover"
-                />
-              </CardHeader>
-              <CardContent className="py-6">
-                <div className="flex items-center gap-3">
-                  <Badge className="bg-primary/5 text-primary hover:bg-primary/5 shadow-none">
-                    {item.penulis}
-                  </Badge>
-                  <span className="font-medium text-xs text-muted-foreground">
-                    {new Date(item.tanggal).toLocaleDateString("id-ID")}
-                  </span>
-                </div>
-
-                <h3 className="mt-4 text-[1.35rem] font-semibold tracking-tight truncate">
-                  {item.judul}
-                </h3>
-                <p className="mt-2 text-muted-foreground line-clamp-3">
-                  {item.deskripsi}
+        {/* Kartu Total Admin dan User */}
+        <div className="flex flex-col items-center justify-center gap-6 px-4 mb-10">
+          <div className="flex flex-row gap-4 w-full">
+            <Card className="w-full sm:w-1/2 shadow-md">
+              <CardContent className="py-6 text-center">
+                <p className="text-sm text-yellow-700 dark:text-yellow-500">
+                  Total Admin
                 </p>
-
-                <Button
-                  className="mt-6 shadow-none"
-                  onClick={() => navigate(`/berita/${item._id}`)}
-                >
-                  Lihat Selengkapnya <ChevronRight />
-                </Button>
+                <p className="text-3xl font-bold">{totalAdmin}</p>
               </CardContent>
             </Card>
-          ))
-        )}
-      </div>
+            <Card className="w-full sm:w-1/2 shadow-md">
+              <CardContent className="py-6 text-center">
+                <p className="text-sm text-yellow-700 dark:text-yellow-500">
+                  Total User
+                </p>
+                <p className="text-3xl font-bold">{totalUser}</p>
+              </CardContent>
+            </Card>
+          </div>
 
-      {totalPages > 1 && (
+          <Link to={"/dashboard/absen-admin"}>
+            <Button variant="outline" className="cursor-pointer">
+              Lihat Kehadiran Semua Anggota
+            </Button>
+          </Link>
+        </div>
+
+        {/* Pencarian & Export */}
+        <div className="flex items-center justify-between gap-4">
+          <Input
+            placeholder="Cari username..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-64"
+          />
+          <Button
+            variant="outline"
+            className="cursor-pointer gap-2"
+            onClick={exportUsers}
+          >
+            <File />
+            Export Daftar Pengguna
+          </Button>
+        </div>
+
+        {/* Tabel */}
+        <Card className="shadow-md">
+          <CardContent className="p-4">
+            <ScrollArea className="w-full overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[160px]">Nama</TableHead>
+                    <TableHead>Username</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>NIK</TableHead>
+                    <TableHead>Tanggal Lahir</TableHead>
+                    <TableHead>No HP</TableHead>
+                    <TableHead className="w-[160px]">Asal</TableHead>
+                    <TableHead className="w-[200px]">Alamat</TableHead>
+                    <TableHead>Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.map((user) => (
+                    <TableRow key={user._id}>
+                      <TableCell className="truncate">
+                        {user.namaLengkap}
+                      </TableCell>
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell>{user.role}</TableCell>
+                      <TableCell>{user.nik}</TableCell>
+                      <TableCell>{user.tglLahir}</TableCell>
+                      <TableCell>{user.noHp}</TableCell>
+                      <TableCell className="truncate">{user.asal}</TableCell>
+                      <TableCell className="truncate">{user.alamat}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-2">
+                          {user.role === "admin" ? (
+                            <>
+                              <ConfirmDialog
+                                trigger={
+                                  <Button
+                                    size="sm"
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-yellow-700"
+                                  >
+                                    Turunkan
+                                  </Button>
+                                }
+                                title="Yakin turunkan admin?"
+                                description="User ini akan kehilangan hak akses admin."
+                                confirmText="Turunkan Sekarang"
+                                onConfirm={() => handleDemote(user._id)}
+                              />
+                              <Button
+                                size="sm"
+                                className="bg-green-800 hover:bg-green-600 text-white"
+                                onClick={() => handleToggleMember(user._id)}
+                              >
+                                {user.isMember
+                                  ? "Non-Member"
+                                  : "Jadikan Member"}
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <ConfirmDialog
+                                trigger={
+                                  <Button
+                                    size="sm"
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-yellow-700"
+                                  >
+                                    Jadikan Admin
+                                  </Button>
+                                }
+                                title="Yakin jadikan admin?"
+                                description="User ini akan mendapatkan akses admin."
+                                confirmText="Promosikan"
+                                onConfirm={() => handlePromote(user._id)}
+                              />
+                              <Button
+                                size="sm"
+                                className="bg-green-800 hover:bg-green-600 text-white"
+                                onClick={() => handleToggleMember(user._id)}
+                              >
+                                {user.isMember
+                                  ? "Non-Member"
+                                  : "Jadikan Member"}
+                              </Button>
+                            </>
+                          )}
+                          <ConfirmDialog
+                            trigger={
+                              <Button size="sm" variant="destructive">
+                                Hapus
+                              </Button>
+                            }
+                            title="Yakin ingin menghapus user?"
+                            description="User akan dihapus secara permanen dari sistem."
+                            confirmText="Hapus Sekarang"
+                            onConfirm={() => handleDelete(user._id)}
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        {/* Pagination Placeholder */}
         <Pagination>
           <PaginationContent>
             <PaginationItem>
@@ -166,9 +297,9 @@ const ListBerita = () => {
             </PaginationItem>
           </PaginationContent>
         </Pagination>
-      )}
+      </div>
     </div>
   );
 };
 
-export default ListBerita;
+export default Home;

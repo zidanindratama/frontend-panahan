@@ -97,6 +97,7 @@ const Navbar = () => {
                 <DropdownMenuTrigger>
                   <Avatar>
                     <AvatarImage
+                      className="object-cover"
                       src={
                         fotoProfil ??
                         "https://ui-avatars.com/api/?name=F+A&background=random"
@@ -124,6 +125,12 @@ const Navbar = () => {
                       <DropdownMenuItem asChild>
                         <Link to="/dashboard/pengurus">Pengurus</Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/dashboard/kontak">Kontak</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/dashboard/gallery">Gallery</Link>
+                      </DropdownMenuItem>
                     </>
                   )}
                   {user.role !== "admin" && (
@@ -131,6 +138,7 @@ const Navbar = () => {
                       <Link to="/dashboard/absen-member">Absen</Link>
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard/profile">Profil</Link>
                   </DropdownMenuItem>

@@ -23,6 +23,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { ArrowLeft } from "lucide-react";
 
 const JABATAN_OPTIONS = [
   "Pembina",
@@ -168,6 +169,14 @@ const TambahPengurus = () => {
                 ) : (
                   "Simpan Pengurus"
                 )}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate("/dashboard/pengurus")}
+              >
+                <ArrowLeft />
+                Kembali
               </Button>
             </form>
           </Form>

@@ -11,106 +11,72 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { z } from "zod";
 import toast from "react-hot-toast";
-import { useNavigate, useParams } from "react-router";
-import { useEffect, useState } from "react";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import { getPengurusById, updatePengurus } from "@/services/pengurus";
+import { z } from "zod";
+import { useNavigate } from "react-router";
+import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
-
-const JABATAN_OPTIONS = [
-  "Pembina",
-  "Ketua",
-  "Sekretaris",
-  "Bendahara",
-  "Kepelatihan",
-  "Bidang Humas",
-  "Bidang Peralatan",
-  "Bidang Kegiatan",
-  "Bidang Media Sosial",
-];
+import { createGallery } from "@/services/gallery";
 
 const schema = z.object({
-  nama: z.string().min(3, "Nama wajib diisi"),
-  jabatan: z.string().min(3, "Jabatan wajib dipilih"),
-  foto: z.any().optional(),
+  judul: z.string().min(3, "Judul minimal 3 karakter"),
+  deskripsi: z
+    .string()
+    .min(10, "Deskripsi minimal 10 karakter")
+    .max(100, "Deskripsi maksimal 100 karakter"),
+  gambar: z.any().optional(),
 });
 
-const UbahPengurus = () => {
-  const { id } = useParams();
+const TambahGallery = () => {
   const navigate = useNavigate();
   const [preview, setPreview] = useState<string>("");
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      nama: "",
-      jabatan: "",
-      foto: undefined,
+      judul: "",
+      deskripsi: "",
+      gambar: undefined,
     },
   });
-
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchData = async () => {
-      try {
-        const data = await getPengurusById(id);
-        form.reset({
-          nama: data.nama,
-          jabatan: data.jabatan,
-        });
-        setPreview(data.foto || "");
-      } catch (err) {
-        toast.error("Gagal mengambil data pengurus");
-      }
-    };
-
-    fetchData();
-  }, [id, form]);
 
   const onSubmit = async (values: z.infer<typeof schema>) => {
     try {
       const formData = new FormData();
-      formData.append("nama", values.nama);
-      formData.append("jabatan", values.jabatan);
-      if (values.foto instanceof File) {
-        formData.append("foto", values.foto);
+      formData.append("judul", values.judul);
+      formData.append("deskripsi", values.deskripsi);
+      if (values.gambar instanceof File) {
+        formData.append("gambar", values.gambar);
       }
 
-      if (!id) return;
-      await updatePengurus(id, formData);
-      toast.success("Data pengurus berhasil diperbarui");
-      navigate("/dashboard/pengurus");
-    } catch (err) {
-      toast.error("Gagal memperbarui data");
+      await createGallery(formData);
+      toast.success("Gambar galeri berhasil ditambahkan");
+      navigate("/dashboard/gallery");
+    } catch {
+      toast.error("Gagal menambahkan gambar galeri");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10">
-      <Card className="w-full max-w-2xl shadow-md">
+      <Card className="w-full max-w-3xl shadow-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Ubah Pengurus</CardTitle>
+          <CardTitle className="text-2xl text-center">
+            Tambah Gambar Galeri
+          </CardTitle>
         </CardHeader>
+
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
                 control={form.control}
-                name="nama"
+                name="judul"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nama</FormLabel>
+                    <FormLabel>Judul</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nama lengkap" {...field} />
+                      <Input placeholder="Masukkan judul gambar" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -119,24 +85,17 @@ const UbahPengurus = () => {
 
               <FormField
                 control={form.control}
-                name="jabatan"
+                name="deskripsi"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Jabatan</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Pilih jabatan" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {JABATAN_OPTIONS.map((jab) => (
-                          <SelectItem key={jab} value={jab}>
-                            {jab}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Deskripsi</FormLabel>
+                    <FormControl>
+                      <textarea
+                        {...field}
+                        placeholder="Masukkan deskripsi gambar"
+                        className="w-full min-h-[120px] p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -144,10 +103,10 @@ const UbahPengurus = () => {
 
               <FormField
                 control={form.control}
-                name="foto"
+                name="gambar"
                 render={() => (
                   <FormItem>
-                    <FormLabel>Foto Pengurus</FormLabel>
+                    <FormLabel>Upload Gambar</FormLabel>
                     <FormControl>
                       <Input
                         type="file"
@@ -155,7 +114,7 @@ const UbahPengurus = () => {
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            form.setValue("foto", file);
+                            form.setValue("gambar", file);
                             setPreview(URL.createObjectURL(file));
                           }
                         }}
@@ -166,7 +125,7 @@ const UbahPengurus = () => {
                         <img
                           src={preview}
                           alt="Preview"
-                          className="max-h-72 object-contain rounded-md"
+                          className="max-h-96 object-contain rounded-md"
                         />
                       </div>
                     )}
@@ -186,13 +145,14 @@ const UbahPengurus = () => {
                     Menyimpan...
                   </div>
                 ) : (
-                  "Perbarui Pengurus"
+                  "Simpan Gambar"
                 )}
               </Button>
+
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => navigate("/dashboard/pengurus")}
+                onClick={() => navigate("/dashboard/gallery")}
               >
                 <ArrowLeft />
                 Kembali
@@ -205,4 +165,4 @@ const UbahPengurus = () => {
   );
 };
 
-export default UbahPengurus;
+export default TambahGallery;

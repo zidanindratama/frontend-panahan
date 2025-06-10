@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getBeritaById, updateBerita } from "@/services/berita";
 import { MinimalTiptapEditor } from "@/components/minimal-tiptap";
 import toast from "react-hot-toast";
+import { ArrowLeft } from "lucide-react";
 
 const schema = z.object({
   judul: z.string().min(3),
@@ -207,6 +208,14 @@ export default function UbahBerita() {
             ) : (
               "Simpan Berita"
             )}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate("/dashboard/berita")}
+          >
+            <ArrowLeft />
+            Kembali
           </Button>
         </form>
       </Form>

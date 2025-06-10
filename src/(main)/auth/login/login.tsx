@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router";
+import { ArrowLeft } from "lucide-react";
 
 const formSchema = z.object({
   username: z.string().min(3, "Username minimal 3 karakter"),
@@ -117,8 +118,19 @@ const Login = () => {
           </Form>
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-2 text-sm">
-          <Link to="#" className="underline text-muted-foreground text-center">
+        <CardFooter className="grid gap-4">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate("/")}
+          >
+            <ArrowLeft />
+            Kembali
+          </Button>
+          <Link
+            to="/auth/lupa-password"
+            className="underline text-muted-foreground text-center"
+          >
             Lupa kata sandi?
           </Link>
           <p className="text-center">

@@ -21,16 +21,32 @@ import PengurusDashboard from "./(main)/dashboard/pengurus/pengurus.tsx";
 import TambahPengurusDashboard from "./(main)/dashboard/pengurus/tambah/tambah-pengurus.tsx";
 import UbahPengurusDashboard from "./(main)/dashboard/pengurus/ubah/ubah-pengurus.tsx";
 import HalamanListPengurus from "./(main)/pengurus/pengurus.tsx";
+import LupaPassword from "./(main)/auth/lupa-password/lupa-password.tsx";
+import ResetPassword from "./(main)/auth/reset-password/lupa-password-verifikasi.tsx";
+import KontakDashboard from "./(main)/dashboard/kontak/kontak.tsx";
+import KontakFormulirDashboard from "./(main)/dashboard/kontak/form/formulir-kontak.tsx";
+import GalleryDashboard from "./(main)/dashboard/gallery/gallery.tsx";
+import TambahGalleryDashboard from "./(main)/dashboard/gallery/tambah/tambah-gallery.tsx";
+import UbahGalleryDashboard from "./(main)/dashboard/gallery/ubah/ubah-gallery.tsx";
+import HalamanListGallery from "./(main)/gallery/gallery.tsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
   { path: "/pengurus", element: <HalamanListPengurus /> },
+  { path: "/gallery", element: <HalamanListGallery /> },
   { path: "/berita", element: <HalamanListBerita /> },
   { path: "/berita/:id", element: <HalamanDetailBerita /> },
   { path: "/auth/login", element: <Login /> },
   { path: "/auth/register", element: <Register /> },
+  { path: "/auth/lupa-password", element: <LupaPassword /> },
+  {
+    path: "/auth/reset-password/:id",
+    element: <ResetPassword />,
+  },
   { path: "/dashboard", element: <HomeDashboard /> },
   { path: "/dashboard/profile", element: <ProfileDashboard /> },
+  { path: "/dashboard/kontak", element: <KontakDashboard /> },
+  { path: "/dashboard/kontak-form", element: <KontakFormulirDashboard /> },
   { path: "/dashboard/berita", element: <BeritaDashboard /> },
   { path: "/dashboard/berita/tambah", element: <TambahBeritaDashboard /> },
   {
@@ -43,6 +59,9 @@ const router = createBrowserRouter([
     path: "/dashboard/pengurus/ubah/:id",
     element: <UbahPengurusDashboard />,
   },
+  { path: "/dashboard/gallery", element: <GalleryDashboard /> },
+  { path: "/dashboard/gallery/tambah", element: <TambahGalleryDashboard /> },
+  { path: "/dashboard/gallery/ubah/:id", element: <UbahGalleryDashboard /> },
   { path: "/dashboard/absen-admin", element: <AbsenAdminDashboard /> },
   { path: "/dashboard/absen-member", element: <AbsenMemberDashboard /> },
   { path: "*", element: <NotFound /> },

@@ -18,6 +18,7 @@ import { useNavigate } from "react-router";
 import { postBerita } from "@/services/berita";
 import { useState } from "react";
 import { MinimalTiptapEditor } from "@/components/minimal-tiptap";
+import { ArrowLeft } from "lucide-react";
 
 const schema = z.object({
   judul: z.string().min(3),
@@ -185,6 +186,14 @@ const TambahBerita = () => {
                 ) : (
                   "Simpan Berita"
                 )}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate("/dashboard/berita")}
+              >
+                <ArrowLeft />
+                Kembali
               </Button>
             </form>
           </Form>

@@ -38,3 +38,43 @@ export const toggleMember = (id: string): Promise<User> =>
 
 export const deleteUser = (id: string): Promise<{ message: string }> =>
   axiosInstance.delete(`/admin/users/${id}`).then((res) => res.data);
+
+export const exportUsers = async () => {
+  const response = await axiosInstance.get("/admin/export-users", {
+    responseType: "blob",
+  });
+
+  const blob = new Blob([response.data], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "daftar-pengguna.xlsx");
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+};
+
+export const exportAbsensi = async (start?: string, end?: string) => {
+  const params: Record<string, string> = {};
+  if (start && end) {
+    params.start = start;
+    params.end = end;
+  }
+
+  const res = await axiosInstance.get("/admin/export-absensi", {
+    responseType: "blob",
+    params,
+  });
+
+  // Membuat URL file dan trigger download
+  const url = window.URL.createObjectURL(new Blob([res.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "daftar-absensi.xlsx");
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+};

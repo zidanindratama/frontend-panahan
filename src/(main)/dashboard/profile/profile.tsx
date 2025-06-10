@@ -1,3 +1,4 @@
+import GantiPassword from "@/components/main/dashboard/profile/ganti-password";
 import Profile from "@/components/main/dashboard/profile/profile";
 import Footer from "@/components/main/footer";
 import Navbar from "@/components/shared/navbar/navbar";
@@ -10,6 +11,7 @@ const ProfileDashboard = () => {
     <div>
       <Navbar />
       <Profile />
+      <GantiPassword />
       <Footer />
     </div>
   );

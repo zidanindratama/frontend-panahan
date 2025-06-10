@@ -31,6 +31,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Calendar } from "@/components/ui/calendar";
+import { exportAbsensi } from "@/services/admin";
 
 const AbsenAdmin = () => {
   const [startDate, setStartDate] = useState<Date>();
@@ -161,7 +162,12 @@ const AbsenAdmin = () => {
               <Search className="w-4 h-4 mr-1" />
               Filter
             </Button>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() =>
+                exportAbsensi(startDate?.toISOString(), endDate?.toISOString())
+              }
+            >
               <FileDown className="w-4 h-4 mr-1" />
               Excel
             </Button>
