@@ -117,7 +117,7 @@ const Navbar = () => {
                         <Link to="/dashboard">Dashboard</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/dashboard/absen-admin">Absen</Link>
+                        <Link to="/dashboard/absen-admin">Kehadiran</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/dashboard/berita">Berita</Link>
@@ -135,7 +135,7 @@ const Navbar = () => {
                   )}
                   {user.role !== "admin" && (
                     <DropdownMenuItem asChild>
-                      <Link to="/dashboard/absen-member">Absen</Link>
+                      <Link to="/dashboard/absen-member">Kehadiran</Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
