@@ -118,6 +118,18 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .dark .rdp-caption_label {
+    @apply text-white bg-transparent;
+  }
+
+  .dark .rdp-dropdown {
+    @apply text-white bg-muted;
+  }
+
+  .dark .rdp-nav_button {
+    @apply text-white hover:bg-gray-700;
+  }
 }
 
 /* Reset agar semua elemen pakai style default browser */

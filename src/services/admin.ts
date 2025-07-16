@@ -78,3 +78,12 @@ export const exportAbsensi = async (start?: string, end?: string) => {
   link.click();
   link.remove();
 };
+
+export const getUserStats = async (): Promise<{
+  totalAdmin: number;
+  totalMember: number;
+  totalNonMember: number;
+}> => {
+  const res = await axiosInstance.get("/admin/stats");
+  return res.data;
+};

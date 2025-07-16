@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,11 +30,13 @@ import {
   getUsers,
   promoteUser,
   toggleMember,
+  getUserStats,
   type User,
 } from "@/services/admin";
 import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Link } from "react-router";
+import { format } from "date-fns";
 
 const Home = () => {
   useAuthRedirect();
@@ -44,6 +48,10 @@ const Home = () => {
   const [search, setSearch] = useState("");
   const [data, setData] = useState<User[]>([]);
 
+  const [totalAdmin, setTotalAdmin] = useState(0);
+  const [totalMember, setTotalMember] = useState(0);
+  const [totalNonMember, setTotalNonMember] = useState(0);
+
   const fetchUsers = async () => {
     try {
       const res = await getUsers(page, limit, search);
@@ -54,10 +62,22 @@ const Home = () => {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const stats = await getUserStats();
+      setTotalAdmin(stats.totalAdmin);
+      setTotalMember(stats.totalMember);
+      setTotalNonMember(stats.totalNonMember);
+    } catch {
+      toast.error("Gagal memuat statistik pengguna");
+    }
+  };
+
   useEffect(() => {
     const delay = setTimeout(() => {
       fetchUsers();
-    }, 500); // delay 500ms
+      fetchStats(); // panggil stats juga saat page berubah
+    }, 500);
 
     return () => clearTimeout(delay);
   }, [search, page]);
@@ -67,6 +87,7 @@ const Home = () => {
       await promoteUser(id);
       toast.success("User diangkat jadi Admin");
       fetchUsers();
+      fetchStats();
     } catch {
       toast.error("Gagal mengangkat user");
     }
@@ -77,6 +98,7 @@ const Home = () => {
       await demoteUser(id);
       toast.success("Admin diturunkan jadi User");
       fetchUsers();
+      fetchStats();
     } catch {
       toast.error("Gagal menurunkan admin");
     }
@@ -87,6 +109,7 @@ const Home = () => {
       await toggleMember(id);
       toast.success("Status member diubah");
       fetchUsers();
+      fetchStats();
     } catch {
       toast.error("Gagal mengubah status member");
     }
@@ -97,23 +120,21 @@ const Home = () => {
       await deleteUser(id);
       toast.success("User dihapus");
       fetchUsers();
+      fetchStats();
     } catch {
       toast.error("Gagal menghapus user");
     }
   };
-
-  const totalAdmin = data.filter((user) => user.role === "admin").length;
-  const totalUser = data.filter((user) => user.role === "user").length;
 
   return (
     <div className="max-w-screen-xl mx-auto py-16 px-6 xl:px-0">
       <div className="space-y-6">
         <h2 className="text-xl font-bold">Dashboard Admin</h2>
 
-        {/* Kartu Total Admin dan User */}
+        {/* Kartu Total Admin, Member, dan Non-Member */}
         <div className="flex flex-col items-center justify-center gap-6 px-4 mb-10">
-          <div className="flex flex-row gap-4 w-full">
-            <Card className="w-full sm:w-1/2 shadow-md">
+          <div className="flex flex-col sm:flex-row gap-4 w-full">
+            <Card className="w-full sm:w-1/3 shadow-md">
               <CardContent className="py-6 text-center">
                 <p className="text-sm text-yellow-700 dark:text-yellow-500">
                   Total Admin
@@ -121,12 +142,20 @@ const Home = () => {
                 <p className="text-3xl font-bold">{totalAdmin}</p>
               </CardContent>
             </Card>
-            <Card className="w-full sm:w-1/2 shadow-md">
+            <Card className="w-full sm:w-1/3 shadow-md">
               <CardContent className="py-6 text-center">
                 <p className="text-sm text-yellow-700 dark:text-yellow-500">
-                  Total User
+                  Total Member
                 </p>
-                <p className="text-3xl font-bold">{totalUser}</p>
+                <p className="text-3xl font-bold">{totalMember}</p>
+              </CardContent>
+            </Card>
+            <Card className="w-full sm:w-1/3 shadow-md">
+              <CardContent className="py-6 text-center">
+                <p className="text-sm text-yellow-700 dark:text-yellow-500">
+                  Total Non-Member
+                </p>
+                <p className="text-3xl font-bold">{totalNonMember}</p>
               </CardContent>
             </Card>
           </div>
@@ -183,7 +212,7 @@ const Home = () => {
                       <TableCell>{user.username}</TableCell>
                       <TableCell>{user.role}</TableCell>
                       <TableCell>{user.nik}</TableCell>
-                      <TableCell>{user.tglLahir}</TableCell>
+                      <TableCell>{format(user.tglLahir, "PPP")}</TableCell>
                       <TableCell>{user.noHp}</TableCell>
                       <TableCell className="truncate">{user.asal}</TableCell>
                       <TableCell className="truncate">{user.alamat}</TableCell>
@@ -264,7 +293,7 @@ const Home = () => {
           </CardContent>
         </Card>
 
-        {/* Pagination Placeholder */}
+        {/* Pagination */}
         <Pagination>
           <PaginationContent>
             <PaginationItem>
